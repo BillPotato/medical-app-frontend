@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import MedicationParser from './components/MedicationParser'
 import Survey from './components/Survey'
 import Dashboard from './components/Dashboard'
+import FeelingAnalyzer from './components/FeelingAnalyzer'
 
 function App() {
   const [view, setView] = useState('dashboard')
@@ -32,6 +33,7 @@ function App() {
           <button onClick={() => setView('dashboard')}>Dashboard</button>
           <button onClick={() => setView('parser')}>Medication parser</button>
           <button onClick={() => setView('survey')}>Daily survey</button>
+          <button onClick={() => setView('analyzer')}>Feeling Analyzer</button>
         </nav>
       </header>
 
@@ -39,6 +41,7 @@ function App() {
         {view === 'dashboard' && <Dashboard tasks={tasks} />}
         {view === 'parser' && <MedicationParser onSave={saveTasks} />}
         {view === 'survey' && <Survey onSubmit={handleSurveySubmit} />}
+        {view === 'analyzer' && <FeelingAnalyzer />}
       </main>
     </div>
   )

@@ -42,6 +42,75 @@ export default function Dashboard({ tasks = [] }) {
     console.log('calendar events', events)
   }
 
+  async function analyzeFeeling() {
+    if (!feelingText.trim()) return
+    setIsAnalyzing(true)
+    setAnalysis(null)
+
+    try {
+      // Attempt server-side analysis first
+      const res = await fetch('/api/analyze-feeling', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: feelingText })
+      })
+
+      if (!res.ok) {
+        // Fallback to local analysis
+        setAnalysis(localAnalyze(feelingText))
+        return
+      }
+
+      const data = await res.json()
+      setAnalysis(data)
+    } catch (err) {
+      // Network error - use local fallback
+      setAnalysis(localAnalyze(feelingText))
+    } finally {
+      setIsAnalyzing(false)
+    }
+  }
+
+  function localAnalyze(text) {
+    // Simple keyword-based analysis for offline/demo mode
+    const t = text.toLowerCase()
+    const recs = []
+    let issue = 'Unclear from description'
+
+    if (/\b(pain|ache|hurt|sharp|stomach|headache)\b/.test(t)) {
+      issue = 'Possible physical pain/discomfort'
+      recs.push('Log pain levels and timing in daily survey')
+      recs.push('Consider over-the-counter pain relief if appropriate')
+      recs.push('Consult healthcare provider if severe or persistent')
+    }
+
+    if (/\b(tired|fatigue|sleep|insomnia)\b/.test(t)) {
+      issue = 'Possible sleep/energy issues'
+      recs.push('Maintain consistent sleep schedule')
+      recs.push('Track sleep patterns in daily survey')
+      recs.push('Review sleep hygiene practices')
+    }
+
+    if (/\b(anxious|worried|stress|depress|sad|mood)\b/.test(t)) {
+      issue = 'Possible mood/emotional concern'
+      recs.push('Continue tracking mood in daily survey')
+      recs.push('Consider speaking with mental health professional')
+      recs.push('Try relaxation or mindfulness exercises')
+    }
+
+    if (!recs.length) {
+      recs.push('Please provide more specific symptoms')
+      recs.push('Consider discussing with healthcare provider')
+    }
+
+    return {
+      issue,
+      recommendations: recs,
+      source: 'local-analysis',
+      timestamp: new Date().toISOString()
+    }
+  }
+
   return (
     <div style={{padding:20}}>
       <h2>Dashboard</h2>
