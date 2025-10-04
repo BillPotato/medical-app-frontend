@@ -28,7 +28,7 @@ const defaultQuestions = [
   {
     id: 'sleep',
     text: 'Sleep quality last night',
-    description: 'Rate your sleep quality',
+    description: 'Rate your sleep quality from 1-5',
     type: 'scale',
     min: 1,
     max: 5
@@ -70,7 +70,6 @@ export default function Survey({ onSubmit }) {
     localStorage.setItem('surveys', JSON.stringify([payload, ...existing]))
     onSubmit && onSubmit(payload)
 
-    // Reset form
     setAnswers(() => {
       const init = {}
       defaultQuestions.forEach((q) => (init[q.id] = ''))
@@ -78,8 +77,8 @@ export default function Survey({ onSubmit }) {
     })
     setCurrentStep(0)
 
-    // Show success message
     alert('Survey submitted successfully! 🎉')
+    navigate('/dashboard')
   }
 
   const currentQuestion = defaultQuestions[currentStep]
@@ -94,7 +93,7 @@ export default function Survey({ onSubmit }) {
               <span>{question.min} (Low)</span>
               <span>{question.max} (High)</span>
             </div>
-            <div className="flex space-x-2">
+            <div className="grid grid-cols-5 gap-2">
               {Array.from({ length: question.max - question.min + 1 }, (_, i) => {
                 const value = i + question.min
                 return (
@@ -102,8 +101,8 @@ export default function Survey({ onSubmit }) {
                     key={value}
                     type="button"
                     onClick={() => handleChange(question.id, value.toString())}
-                    className={`flex-1 py-3 rounded-xl font-semibold transition-all duration-200 ${answers[question.id] === value.toString()
-                        ? 'bg-blue-500 text-white shadow-md transform scale-105'
+                    className={`py-4 rounded-lg font-semibold transition-all ${answers[question.id] === value.toString()
+                        ? 'bg-blue-600 text-white shadow-md transform scale-105'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
                   >
@@ -122,7 +121,7 @@ export default function Survey({ onSubmit }) {
             value={answers[question.id]}
             onChange={(e) => handleChange(question.id, e.target.value)}
             placeholder={question.placeholder}
-            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-lg text-center"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-lg text-center"
           />
         )
 
@@ -134,12 +133,12 @@ export default function Survey({ onSubmit }) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8">
       <div className="max-w-2xl mx-auto px-4">
-        <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
           {/* Header */}
-          <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-8 text-white">
+          <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-8 text-white">
             <button
               onClick={() => navigate('/dashboard')}
-              className="flex items-center space-x-2 text-blue-100 hover:text-white mb-6 transition-colors duration-200"
+              className="flex items-center space-x-2 text-blue-100 hover:text-white mb-6 transition-colors"
             >
               <span>←</span>
               <span>Back to Dashboard</span>
@@ -156,7 +155,7 @@ export default function Survey({ onSubmit }) {
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div
-                className="bg-blue-500 h-2 rounded-full transition-all duration-500 ease-out"
+                className="bg-blue-600 h-2 rounded-full transition-all duration-500"
                 style={{ width: `${progress}%` }}
               ></div>
             </div>
@@ -180,7 +179,7 @@ export default function Survey({ onSubmit }) {
               <button
                 onClick={prevStep}
                 disabled={currentStep === 0}
-                className={`px-6 py-3 rounded-xl font-medium transition-all duration-200 ${currentStep === 0
+                className={`px-6 py-3 rounded-lg font-medium transition-all ${currentStep === 0
                     ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                     : 'bg-gray-500 text-white hover:bg-gray-600'
                   }`}
@@ -192,7 +191,7 @@ export default function Survey({ onSubmit }) {
                 <button
                   onClick={submit}
                   disabled={!answers[currentQuestion.id]}
-                  className="bg-green-500 hover:bg-green-600 text-white px-8 py-3 rounded-xl font-semibold transition-all duration-200 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                  className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-semibold transition-all disabled:bg-gray-300 disabled:cursor-not-allowed"
                 >
                   Submit Survey
                 </button>
@@ -200,7 +199,7 @@ export default function Survey({ onSubmit }) {
                 <button
                   onClick={nextStep}
                   disabled={!answers[currentQuestion.id]}
-                  className="bg-blue-500 hover:bg-blue-600 text-white px-8 py-3 rounded-xl font-semibold transition-all duration-200 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold transition-all disabled:bg-gray-300 disabled:cursor-not-allowed"
                 >
                   Next Question
                 </button>

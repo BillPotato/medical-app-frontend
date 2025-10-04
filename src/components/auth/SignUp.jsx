@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import './Auth.css';
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
@@ -24,78 +23,106 @@ const SignUp = () => {
       return;
     }
 
-    // TEMPORARY: Simulate API call
     setTimeout(() => {
       localStorage.setItem('token', 'mock-token');
       localStorage.setItem('user', JSON.stringify({
         name: formData.name,
         email: formData.email
       }));
-
-      // Initialize user-specific data
       localStorage.setItem('tasks', JSON.stringify([]));
       localStorage.setItem('surveys', JSON.stringify([]));
-
       navigate('/dashboard');
       setLoading(false);
     }, 1000);
   };
 
   return (
-    <div className="auth-container">
-      <div className="auth-form">
-        <h2>Join Patient Helper</h2>
-        {error && <div className="error-message">{error}</div>}
+    <div className="min-h-screen bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Create Account</h1>
+          <p className="text-gray-600">Join Patient Helper today</p>
+        </div>
 
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 text-center">
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
             <input
               type="text"
-              placeholder="Full Name"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+              placeholder="Enter your full name"
               required
             />
           </div>
 
-          <div className="form-group">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
             <input
               type="email"
-              placeholder="Email"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+              placeholder="Enter your email"
               required
             />
           </div>
 
-          <div className="form-group">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
             <input
               type="password"
-              placeholder="Password"
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+              placeholder="Create a password"
               required
             />
           </div>
 
-          <div className="form-group">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
             <input
               type="password"
-              placeholder="Confirm Password"
               value={formData.confirmPassword}
               onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+              placeholder="Confirm your password"
               required
             />
           </div>
 
-          <button type="submit" disabled={loading} className="auth-button">
-            {loading ? 'Creating Account...' : 'Sign Up'}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center"
+          >
+            {loading ? (
+              <>
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                Creating Account...
+              </>
+            ) : (
+              'Create Account'
+            )}
           </button>
         </form>
 
-        <p className="auth-link">
-          Already have an account? <Link to="/signin">Sign In</Link>
-        </p>
+        <div className="mt-8 text-center">
+          <p className="text-gray-600">
+            Already have an account?{' '}
+            <Link to="/signin" className="text-blue-600 hover:text-blue-700 font-semibold">
+              Sign In
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );
