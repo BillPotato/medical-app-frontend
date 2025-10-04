@@ -1,3 +1,4 @@
+// components/auth/SignIn.jsx
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 
@@ -19,11 +20,12 @@ const SignIn = () => {
           name: 'Test User',
           email: formData.email
         }));
-        navigate('/dashboard');
+        // Use window.location to avoid React Router navigation issues
+        window.location.href = '/dashboard';
       } else {
         setError('Invalid credentials. Use: test@test.com / password');
+        setLoading(false);
       }
-      setLoading(false);
     }, 1000);
   };
 
@@ -85,7 +87,7 @@ const SignIn = () => {
         <div className="mt-8 text-center">
           <p className="text-gray-600">
             Don't have an account?{' '}
-            <Link to="/signup" className="text-blue-600 hover:text-blue-700 font-semibold">
+            <Link to="/auth/signup" className="text-blue-600 hover:text-blue-700 font-semibold">
               Sign Up
             </Link>
           </p>

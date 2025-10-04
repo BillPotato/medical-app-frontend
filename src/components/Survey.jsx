@@ -1,37 +1,43 @@
+// components/Survey.jsx
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTheme } from '../contexts/ThemeContext'
 
+// Add this missing defaultQuestions array
 const defaultQuestions = [
   {
     id: 'mood',
-    text: 'How is your mood today?',
-    description: 'Rate from 1 (Very Poor) to 5 (Excellent)',
+    text: 'How are you feeling today?',
+    description: 'Take a moment to check in with yourself',
     type: 'scale',
     min: 1,
-    max: 5
+    max: 5,
+    labels: ['Not great', 'Could be better', 'Okay', 'Good', 'Excellent']
   },
   {
     id: 'pain',
-    text: 'Any pain or discomfort today?',
-    description: 'Scale from 0 (No Pain) to 10 (Severe Pain)',
+    text: 'Are you experiencing any discomfort?',
+    description: "We'd like to understand how your body feels",
     type: 'scale',
     min: 0,
-    max: 10
+    max: 10,
+    labels: ['None', 'Mild', 'Moderate', 'Severe']
   },
   {
     id: 'exercise',
-    text: 'Minutes of exercise today',
-    description: 'Total minutes of physical activity',
+    text: 'How much did you move today?',
+    description: 'Any physical activity counts, even a short walk',
     type: 'number',
-    placeholder: 'Enter minutes'
+    placeholder: 'Minutes of activity'
   },
   {
     id: 'sleep',
-    text: 'Sleep quality last night',
-    description: 'Rate your sleep quality from 1-5',
+    text: 'How did you sleep last night?',
+    description: 'Quality matters more than quantity',
     type: 'scale',
     min: 1,
-    max: 5
+    max: 5,
+    labels: ['Poor', 'Fair', 'Good', 'Very good', 'Excellent']
   },
 ]
 
@@ -43,6 +49,7 @@ export default function Survey({ onSubmit }) {
   })
   const [currentStep, setCurrentStep] = useState(0)
   const navigate = useNavigate()
+  const { isDark } = useTheme()
 
   const handleChange = (id, value) => {
     setAnswers((s) => ({ ...s, [id]: value }))
@@ -77,7 +84,7 @@ export default function Survey({ onSubmit }) {
     })
     setCurrentStep(0)
 
-    alert('Survey submitted successfully! 🎉')
+    alert('Thank you for sharing! Your responses help us support you better.')
     navigate('/dashboard')
   }
 
@@ -87,42 +94,64 @@ export default function Survey({ onSubmit }) {
   const renderInput = (question) => {
     switch (question.type) {
       case 'scale':
+        const range = question.max - question.min + 1
         return (
-          <div className="space-y-4">
-            <div className="flex justify-between text-sm text-gray-500 mb-2">
-              <span>{question.min} (Low)</span>
-              <span>{question.max} (High)</span>
-            </div>
-            <div className="grid grid-cols-5 gap-2">
-              {Array.from({ length: question.max - question.min + 1 }, (_, i) => {
+          <div className="space-y-6">
+            <div className={`grid gap-3 ${range <= 5 ? 'grid-cols-5' : 'grid-cols-11'}`}>
+              {Array.from({ length: range }, (_, i) => {
                 const value = i + question.min
+                const isSelected = answers[question.id] === value.toString()
                 return (
                   <button
                     key={value}
                     type="button"
                     onClick={() => handleChange(question.id, value.toString())}
-                    className={`py-4 rounded-lg font-semibold transition-all ${answers[question.id] === value.toString()
-                        ? 'bg-blue-600 text-white shadow-md transform scale-105'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    className={`group relative py-5 px-2 rounded-2xl font-medium transition-all duration-300 ${isSelected
+                      ? 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-200 scale-105'
+                      : `bg-white dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-indigo-300 dark:hover:border-indigo-500 hover:shadow-md`
                       }`}
                   >
-                    {value}
+                    <span className="text-xl block">{value}</span>
+                    {isSelected && (
+                      <div className="absolute -top-1 -right-1 w-5 h-5 bg-green-400 rounded-full flex items-center justify-center">
+                        <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                    )}
                   </button>
                 )
               })}
             </div>
+            {question.labels && (
+              <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 px-2">
+                <span>{question.labels[0]}</span>
+                <span>{question.labels[question.labels.length - 1]}</span>
+              </div>
+            )}
           </div>
         )
 
       case 'number':
         return (
-          <input
-            type="number"
-            value={answers[question.id]}
-            onChange={(e) => handleChange(question.id, e.target.value)}
-            placeholder={question.placeholder}
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-lg text-center"
-          />
+          <div className="max-w-md mx-auto">
+            <div className="relative">
+              <input
+                type="number"
+                value={answers[question.id]}
+                onChange={(e) => handleChange(question.id, e.target.value)}
+                placeholder={question.placeholder}
+                className="w-full px-6 py-4 border-2 border-gray-200 dark:border-gray-600 rounded-2xl focus:ring-4 focus:ring-indigo-100 dark:focus:ring-indigo-900 focus:border-indigo-400 dark:focus:border-indigo-500 outline-none transition-all text-2xl text-center font-medium bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              />
+              {answers[question.id] && (
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 text-green-500">
+                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                </div>
+              )}
+            </div>
+          </div>
         )
 
       default:
@@ -131,81 +160,110 @@ export default function Survey({ onSubmit }) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8">
-      <div className="max-w-2xl mx-auto px-4">
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+    <div className={`min-h-screen py-8 px-4 ${isDark ? 'bg-slate-900' : 'bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50'}`}>
+      <div className="max-w-3xl mx-auto">
+        <div className={`${isDark ? 'bg-gray-800/80 border-gray-700' : 'bg-white/80 backdrop-blur-sm'} rounded-3xl shadow-2xl overflow-hidden border ${isDark ? 'border-gray-700' : 'border-white/20'}`}>
           {/* Header */}
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-8 text-white">
+          <div className="relative bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 p-8 text-white overflow-hidden">
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute top-0 left-0 w-64 h-64 bg-white rounded-full -translate-x-32 -translate-y-32"></div>
+              <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full translate-x-32 translate-y-32"></div>
+            </div>
+
             <button
               onClick={() => navigate('/dashboard')}
-              className="flex items-center space-x-2 text-blue-100 hover:text-white mb-6 transition-colors"
+              className="relative flex items-center space-x-2 text-white/80 hover:text-white mb-6 transition-colors group"
             >
-              <span>←</span>
-              <span>Back to Dashboard</span>
+              <svg className="w-5 h-5 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              <span className="font-medium">Back to Dashboard</span>
             </button>
-            <h1 className="text-3xl font-bold mb-2">Daily Health Survey</h1>
-            <p className="text-blue-100">Your responses help track your health progress</p>
+
+            <div className="relative">
+              <h1 className="text-3xl font-bold mb-2">Your Daily Check-In</h1>
+              <p className="text-white/90 text-lg">We're here to support your wellness journey</p>
+            </div>
           </div>
 
           {/* Progress Bar */}
-          <div className="px-8 pt-6">
-            <div className="flex justify-between text-sm text-gray-600 mb-2">
-              <span>Question {currentStep + 1} of {defaultQuestions.length}</span>
-              <span>{Math.round(progress)}% Complete</span>
+          <div className="px-8 pt-8 pb-4">
+            <div className="flex justify-between items-center text-sm text-gray-600 dark:text-gray-400 mb-3">
+              <span className="font-medium">Step {currentStep + 1} of {defaultQuestions.length}</span>
+              <span className="text-indigo-600 dark:text-indigo-400 font-semibold">{Math.round(progress)}% complete</span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
+            <div className="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
               <div
-                className="bg-blue-600 h-2 rounded-full transition-all duration-500"
+                className="bg-gradient-to-r from-indigo-500 to-purple-500 h-3 rounded-full transition-all duration-700 ease-out relative"
                 style={{ width: `${progress}%` }}
-              ></div>
+              >
+                <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
+              </div>
             </div>
           </div>
 
           {/* Question */}
-          <div className="p-8">
-            <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          <div className="p-8 pt-6">
+            <div className="text-center mb-10 space-y-3">
+              <div className="inline-block px-4 py-1 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-full text-sm font-medium mb-2">
+                Question {currentStep + 1}
+              </div>
+              <h2 className="text-3xl font-bold text-gray-800 dark:text-white leading-tight">
                 {currentQuestion.text}
               </h2>
-              <p className="text-gray-600">{currentQuestion.description}</p>
+              <p className="text-gray-500 dark:text-gray-400 text-lg">{currentQuestion.description}</p>
             </div>
 
-            <div className="mb-8">
+            <div className="mb-10">
               {renderInput(currentQuestion)}
             </div>
 
             {/* Navigation */}
-            <div className="flex justify-between pt-6 border-t border-gray-200">
+            <div className="flex justify-between items-center pt-8 border-t border-gray-100 dark:border-gray-700">
               <button
                 onClick={prevStep}
                 disabled={currentStep === 0}
-                className={`px-6 py-3 rounded-lg font-medium transition-all ${currentStep === 0
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                    : 'bg-gray-500 text-white hover:bg-gray-600'
+                className={`flex items-center space-x-2 px-6 py-3 rounded-xl font-medium transition-all ${currentStep === 0
+                  ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 cursor-not-allowed'
+                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 hover:shadow-md'
                   }`}
               >
-                Previous
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                <span>Previous</span>
               </button>
 
               {currentStep === defaultQuestions.length - 1 ? (
                 <button
                   onClick={submit}
                   disabled={!answers[currentQuestion.id]}
-                  className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-semibold transition-all disabled:bg-gray-300 disabled:cursor-not-allowed"
+                  className="flex items-center space-x-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-8 py-3 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl disabled:from-gray-300 disabled:to-gray-300 disabled:cursor-not-allowed disabled:shadow-none transform hover:scale-105 disabled:transform-none"
                 >
-                  Submit Survey
+                  <span>Complete Check-In</span>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
                 </button>
               ) : (
                 <button
                   onClick={nextStep}
                   disabled={!answers[currentQuestion.id]}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold transition-all disabled:bg-gray-300 disabled:cursor-not-allowed"
+                  className="flex items-center space-x-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white px-8 py-3 rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl disabled:from-gray-300 disabled:to-gray-300 disabled:cursor-not-allowed disabled:shadow-none transform hover:scale-105 disabled:transform-none"
                 >
-                  Next Question
+                  <span>Continue</span>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
                 </button>
               )}
             </div>
           </div>
+        </div>
+
+        {/* Helper text */}
+        <div className="text-center mt-6 text-gray-500 dark:text-gray-400 text-sm">
+          <p>Your responses are private and help us understand your health better</p>
         </div>
       </div>
     </div>
