@@ -14,8 +14,9 @@ import {
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 import MedicationTracker from './MedicationTracker';
-import ThemeToggle from './ThemeToggle'; // Add this import
-import { useTheme } from '../contexts/ThemeContext'; // Add this import
+import ThemeToggle from './ThemeToggle';
+import { useTheme } from '../contexts/ThemeContext';
+import InteractiveStatBox from './InteractiveMoodbox';
 
 ChartJS.register(
   CategoryScale,
@@ -33,7 +34,10 @@ export default function Dashboard({ tasks = [], onUpdateTask, onDeleteTask }) {
   const [chartType, setChartType] = useState('mood');
   const [activeTab, setActiveTab] = useState('overview');
   const navigate = useNavigate();
-  const { isDark } = useTheme(); // Get theme state
+  const { isDark } = useTheme();
+
+  // MOVE USER DEFINITION UP HERE
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
 
   useEffect(() => {
     const s = JSON.parse(localStorage.getItem('surveys') || '[]');
@@ -179,8 +183,6 @@ export default function Dashboard({ tasks = [], onUpdateTask, onDeleteTask }) {
     navigate('/auth/signin');
   };
 
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
-
   const StatCard = ({ title, value, subtitle, icon, gradient }) => (
     <div className={`bg-gradient-to-br ${gradient} rounded-2xl p-6 shadow-lg border border-white/20 backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:shadow-xl`}>
       <div className="flex items-center justify-between">
@@ -198,11 +200,11 @@ export default function Dashboard({ tasks = [], onUpdateTask, onDeleteTask }) {
     <button
       onClick={() => setChartType(type)}
       className={`flex items-center space-x-3 px-6 py-4 rounded-xl transition-all duration-300 ${isActive
-          ? 'bg-blue-600 text-white shadow-lg transform scale-105'
-          : `${isDark
-            ? 'bg-gray-800 text-gray-200 hover:bg-gray-700'
-            : 'bg-white/80 text-gray-700 hover:bg-white'
-          } hover:shadow-md`
+        ? 'bg-blue-600 text-white shadow-lg transform scale-105'
+        : `${isDark
+          ? 'bg-gray-800 text-gray-200 hover:bg-gray-700'
+          : 'bg-white/80 text-gray-700 hover:bg-white'
+        } hover:shadow-md`
         }`}
     >
       <span className="text-xl">{icon}</span>
@@ -214,11 +216,11 @@ export default function Dashboard({ tasks = [], onUpdateTask, onDeleteTask }) {
     <button
       onClick={() => setActiveTab(tab)}
       className={`flex items-center space-x-3 px-6 py-3 rounded-xl font-semibold transition-all ${isActive
-          ? 'bg-blue-600 text-white shadow-lg transform scale-105'
-          : `${isDark
-            ? 'bg-gray-800 text-gray-200 hover:bg-gray-700'
-            : 'bg-white text-gray-700 hover:bg-gray-50'
-          }`
+        ? 'bg-blue-600 text-white shadow-lg transform scale-105'
+        : `${isDark
+          ? 'bg-gray-800 text-gray-200 hover:bg-gray-700'
+          : 'bg-white text-gray-700 hover:bg-gray-50'
+        }`
         }`}
     >
       <span className="text-xl">{icon}</span>
@@ -247,7 +249,6 @@ export default function Dashboard({ tasks = [], onUpdateTask, onDeleteTask }) {
         </div>
       </div>
 
-      {/* Rest of your Dashboard component remains the same but with dark mode classes */}
       {/* Tab Navigation */}
       <div className="flex space-x-4">
         <TabButton
@@ -267,35 +268,44 @@ export default function Dashboard({ tasks = [], onUpdateTask, onDeleteTask }) {
       {/* Content based on active tab */}
       {activeTab === 'overview' ? (
         <>
-          {/* Stats Grid */}
+          {/* Stats Grid - ALL CARDS ARE NOW INTERACTIVE */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <StatCard
+            <InteractiveStatBox
               title="Total Surveys"
               value={stats.totalSurveys}
               subtitle="This month"
               icon="📊"
               gradient="from-blue-500 to-cyan-500"
+              type="surveys"
             />
-            <StatCard
+
+            <InteractiveStatBox
               title="Average Mood"
               value={stats.avgMood}
               subtitle="Out of 5"
               icon="😊"
               gradient="from-green-500 to-emerald-500"
+              type="mood"
+              additionalData={{ exercise: stats.avgExercise }}
             />
-            <StatCard
+
+            <InteractiveStatBox
               title="Average Pain"
               value={stats.avgPain}
               subtitle="Out of 10"
               icon="🎯"
               gradient="from-orange-500 to-red-500"
+              type="pain"
             />
-            <StatCard
+
+            <InteractiveStatBox
               title="Avg Exercise"
-              value={`${stats.avgExercise}m`}
-              subtitle="Daily average"
+              value={`${stats.avgExercise}`}
+              subtitle="Minutes daily"
               icon="💪"
               gradient="from-purple-500 to-pink-500"
+              type="exercise"
+              additionalData={{ surveys: stats.totalSurveys }}
             />
           </div>
 
@@ -375,13 +385,13 @@ export default function Dashboard({ tasks = [], onUpdateTask, onDeleteTask }) {
                   <div className="space-y-4">
                     {tasks.filter(task => task.isActive).slice(0, 5).map((task) => (
                       <div key={task.id} className={`flex items-center justify-between p-4 rounded-xl border transition-all duration-300 hover:shadow-md ${isDark
-                          ? 'bg-gray-700/50 border-gray-600 hover:border-blue-400'
-                          : 'bg-gradient-to-r from-gray-50 to-blue-50/30 border-gray-200/60 hover:border-blue-300'
+                        ? 'bg-gray-700/50 border-gray-600 hover:border-blue-400'
+                        : 'bg-gradient-to-r from-gray-50 to-blue-50/30 border-gray-200/60 hover:border-blue-300'
                         }`}>
                         <div className="flex items-center space-x-4">
                           <div className={`w-3 h-3 rounded-full ${task.completed && task.completed.some(comp => new Date(comp.timestamp).toDateString() === new Date().toDateString())
-                              ? 'bg-green-500'
-                              : 'bg-blue-500'
+                            ? 'bg-green-500'
+                            : 'bg-blue-500'
                             }`}></div>
                           <div>
                             <span className={`font-medium ${isDark ? 'text-gray-100' : 'text-gray-800'
@@ -396,8 +406,8 @@ export default function Dashboard({ tasks = [], onUpdateTask, onDeleteTask }) {
                         </div>
                         <div className="flex items-center space-x-2">
                           <span className={`px-3 py-1 text-xs rounded-full ${task.frequency === 'daily'
-                              ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200'
-                              : 'bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200'
+                            ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200'
+                            : 'bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200'
                             }`}>
                             {task.frequency}
                           </span>
@@ -481,8 +491,8 @@ export default function Dashboard({ tasks = [], onUpdateTask, onDeleteTask }) {
                   <button
                     onClick={() => navigate('/survey')}
                     className={`w-full flex items-center space-x-4 p-6 rounded-xl transition-all duration-300 border hover:shadow-lg transform hover:scale-[1.02] text-left ${isDark
-                        ? 'bg-gray-700/50 border-gray-600 hover:border-blue-400'
-                        : 'bg-gradient-to-r from-blue-50 to-cyan-50/50 border-blue-200/60 hover:border-blue-300'
+                      ? 'bg-gray-700/50 border-gray-600 hover:border-blue-400'
+                      : 'bg-gradient-to-r from-blue-50 to-cyan-50/50 border-blue-200/60 hover:border-blue-300'
                       }`}
                   >
                     <div className="text-2xl">📝</div>
@@ -497,8 +507,8 @@ export default function Dashboard({ tasks = [], onUpdateTask, onDeleteTask }) {
                   <button
                     onClick={() => navigate('/feeling-analyzer')}
                     className={`w-full flex items-center space-x-4 p-6 rounded-xl transition-all duration-300 border hover:shadow-lg transform hover:scale-[1.02] text-left ${isDark
-                        ? 'bg-gray-700/50 border-gray-600 hover:border-green-400'
-                        : 'bg-gradient-to-r from-green-50 to-emerald-50/50 border-green-200/60 hover:border-green-300'
+                      ? 'bg-gray-700/50 border-gray-600 hover:border-green-400'
+                      : 'bg-gradient-to-r from-green-50 to-emerald-50/50 border-green-200/60 hover:border-green-300'
                       }`}
                   >
                     <div className="text-2xl">😊</div>
@@ -513,8 +523,8 @@ export default function Dashboard({ tasks = [], onUpdateTask, onDeleteTask }) {
                   <button
                     onClick={() => navigate('/medication-parser')}
                     className={`w-full flex items-center space-x-4 p-6 rounded-xl transition-all duration-300 border hover:shadow-lg transform hover:scale-[1.02] text-left ${isDark
-                        ? 'bg-gray-700/50 border-gray-600 hover:border-purple-400'
-                        : 'bg-gradient-to-r from-purple-50 to-pink-50/50 border-purple-200/60 hover:border-purple-300'
+                      ? 'bg-gray-700/50 border-gray-600 hover:border-purple-400'
+                      : 'bg-gradient-to-r from-purple-50 to-pink-50/50 border-purple-200/60 hover:border-purple-300'
                       }`}
                   >
                     <div className="text-2xl">💊</div>
@@ -530,8 +540,8 @@ export default function Dashboard({ tasks = [], onUpdateTask, onDeleteTask }) {
 
               {/* Health Tips */}
               <div className={`bg-gradient-to-br rounded-3xl p-8 border shadow-lg ${isDark
-                  ? 'from-emerald-900/50 to-green-800/50 border-emerald-700'
-                  : 'from-emerald-50 to-green-100/50 border-emerald-200/60'
+                ? 'from-emerald-900/50 to-green-800/50 border-emerald-700'
+                : 'from-emerald-50 to-green-100/50 border-emerald-200/60'
                 }`}>
                 <h3 className={`font-semibold mb-4 flex items-center text-lg ${isDark ? 'text-gray-100' : 'text-gray-900'
                   }`}>
