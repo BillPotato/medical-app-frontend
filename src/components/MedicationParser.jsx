@@ -1,11 +1,12 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+// components/MedicationParser.jsx
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export default function MedicationParser({ onSave }) {
-  const [text, setText] = useState('')
-  const [parsedTasks, setParsedTasks] = useState([])
-  const [isParsing, setIsParsing] = useState(false)
-  const navigate = useNavigate()
+  const [text, setText] = useState('');
+  const [parsedTasks, setParsedTasks] = useState([]);
+  const [isParsing, setIsParsing] = useState(false);
+  const navigate = useNavigate();
 
   const examples = [
     `Lisinopril 10mg - once daily
@@ -17,7 +18,7 @@ Aspirin 81mg - once daily`,
 Omega-3 1000mg twice daily
 Calcium 600mg with breakfast
 Multivitamin once daily`
-  ]
+  ];
 
   function parseToTasks(input) {
     return input
@@ -25,26 +26,41 @@ Multivitamin once daily`
       .map((line) => line.trim())
       .filter(Boolean)
       .map((line, i) => {
-        const lowerLine = line.toLowerCase()
-        let frequency = 'as-directed'
-        let type = 'medication'
+        const lowerLine = line.toLowerCase();
+        let frequency = 'as-directed';
+        let type = 'medication';
+        let defaultTime = '08:00'; // Default morning time
 
+        // Frequency detection
         if (/\b(once|1x|one time)\b/.test(lowerLine)) {
-          frequency = 'once-daily'
+          frequency = 'once-daily';
         } else if (/\b(twice|2x|two times|bid)\b/.test(lowerLine)) {
-          frequency = 'twice-daily'
+          frequency = 'twice-daily';
+          defaultTime = '08:00,20:00';
         } else if (/\b(three times|3x|tid)\b/.test(lowerLine)) {
-          frequency = 'three-times-daily'
+          frequency = 'three-times-daily';
+          defaultTime = '08:00,13:00,20:00';
         } else if (/\b(daily|every day|qd)\b/.test(lowerLine)) {
-          frequency = 'daily'
+          frequency = 'daily';
         } else if (/\b(weekly|once weekly)\b/.test(lowerLine)) {
-          frequency = 'weekly'
+          frequency = 'weekly';
         } else if (/\b(as needed|prn|when needed)\b/.test(lowerLine)) {
-          frequency = 'as-needed'
+          frequency = 'as-needed';
+        }
+
+        // Time detection based on context
+        if (/\b(morning|breakfast)\b/.test(lowerLine)) {
+          defaultTime = '08:00';
+        } else if (/\b(lunch|noon|midday)\b/.test(lowerLine)) {
+          defaultTime = '12:00';
+        } else if (/\b(dinner|evening|supper)\b/.test(lowerLine)) {
+          defaultTime = '18:00';
+        } else if (/\b(bedtime|night|sleep)\b/.test(lowerLine)) {
+          defaultTime = '22:00';
         }
 
         if (/\b(vitamin|supplement|omega|calcium|multivitamin)\b/.test(lowerLine)) {
-          type = 'supplement'
+          type = 'supplement';
         }
 
         return {
@@ -52,34 +68,69 @@ Multivitamin once daily`
           title: line,
           frequency,
           type,
+          defaultTime,
+          times: defaultTime.split(','),
+          completed: [],
+          createdAt: new Date().toISOString(),
+          isActive: true,
           parsed: true
-        }
-      })
+        };
+      });
   }
 
   function handleParse() {
-    if (!text.trim()) return
+    if (!text.trim()) return;
 
-    setIsParsing(true)
+    setIsParsing(true);
     setTimeout(() => {
-      const tasks = parseToTasks(text)
-      setParsedTasks(tasks)
-      setIsParsing(false)
-    }, 1000)
+      const tasks = parseToTasks(text);
+      setParsedTasks(tasks);
+      setIsParsing(false);
+    }, 1000);
+  }
+
+  function handleTimeChange(taskId, timeIndex, newTime) {
+    setParsedTasks(prev => prev.map(task => {
+      if (task.id === taskId) {
+        const newTimes = [...task.times];
+        newTimes[timeIndex] = newTime;
+        return { ...task, times: newTimes };
+      }
+      return task;
+    }));
+  }
+
+  function addTimeSlot(taskId) {
+    setParsedTasks(prev => prev.map(task => {
+      if (task.id === taskId) {
+        return { ...task, times: [...task.times, '08:00'] };
+      }
+      return task;
+    }));
+  }
+
+  function removeTimeSlot(taskId, timeIndex) {
+    setParsedTasks(prev => prev.map(task => {
+      if (task.id === taskId && task.times.length > 1) {
+        const newTimes = task.times.filter((_, index) => index !== timeIndex);
+        return { ...task, times: newTimes };
+      }
+      return task;
+    }));
   }
 
   function handleSave() {
-    if (parsedTasks.length === 0) return
+    if (parsedTasks.length === 0) return;
 
-    onSave(parsedTasks)
-    setText('')
-    setParsedTasks([])
-    navigate('/dashboard')
+    onSave(parsedTasks);
+    setText('');
+    setParsedTasks([]);
+    navigate('/dashboard');
   }
 
   function loadExample(exampleText) {
-    setText(exampleText)
-    setParsedTasks([])
+    setText(exampleText);
+    setParsedTasks([]);
   }
 
   const getFrequencyColor = (frequency) => {
@@ -91,17 +142,17 @@ Multivitamin once daily`
       'weekly': 'bg-orange-100 text-orange-800',
       'as-needed': 'bg-gray-100 text-gray-800',
       'as-directed': 'bg-yellow-100 text-yellow-800'
-    }
-    return colors[frequency] || 'bg-gray-100 text-gray-800'
-  }
+    };
+    return colors[frequency] || 'bg-gray-100 text-gray-800';
+  };
 
   const getTypeIcon = (type) => {
     const icons = {
       'medication': '💊',
       'supplement': '🌿'
-    }
-    return icons[type] || '💊'
-  }
+    };
+    return icons[type] || '💊';
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50/30 py-8">
@@ -119,7 +170,7 @@ Multivitamin once daily`
             Medication Parser
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Paste your medication list and we'll automatically create manageable tasks
+            Paste your medication list and we'll automatically create manageable tasks with reminders
           </p>
         </div>
 
@@ -204,17 +255,17 @@ Ibuprofen 400mg - as needed for pain`}
                   </span>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-6">
                   {parsedTasks.map((task) => (
                     <div key={task.id} className="p-4 bg-gray-50 rounded-lg border border-gray-200 hover:border-blue-300 transition-colors">
-                      <div className="flex items-start justify-between mb-2">
+                      <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center space-x-3">
                           <span className="text-xl">{getTypeIcon(task.type)}</span>
                           <span className="font-medium text-gray-900">{task.title}</span>
                         </div>
                       </div>
 
-                      <div className="flex flex-wrap gap-2 mt-3">
+                      <div className="flex flex-wrap gap-2 mb-4">
                         <span className={`px-2 py-1 text-xs rounded-full ${getFrequencyColor(task.frequency)}`}>
                           {task.frequency.replace(/-/g, ' ')}
                         </span>
@@ -222,13 +273,46 @@ Ibuprofen 400mg - as needed for pain`}
                           {task.type.replace(/-/g, ' ')}
                         </span>
                       </div>
+
+                      {/* Time Scheduling */}
+                      <div className="space-y-3">
+                        <label className="block text-sm font-medium text-gray-700">
+                          Reminder Times:
+                        </label>
+                        <div className="space-y-2">
+                          {task.times.map((time, timeIndex) => (
+                            <div key={timeIndex} className="flex items-center space-x-2">
+                              <input
+                                type="time"
+                                value={time}
+                                onChange={(e) => handleTimeChange(task.id, timeIndex, e.target.value)}
+                                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                              />
+                              {task.times.length > 1 && (
+                                <button
+                                  onClick={() => removeTimeSlot(task.id, timeIndex)}
+                                  className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                >
+                                  ×
+                                </button>
+                              )}
+                            </div>
+                          ))}
+                          <button
+                            onClick={() => addTimeSlot(task.id)}
+                            className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center space-x-1"
+                          >
+                            <span>+ Add another time</span>
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
 
                 <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
                   <p className="text-sm text-blue-800">
-                    <strong>Tip:</strong> These tasks will be added to your dashboard for tracking.
+                    <strong>Tip:</strong> These tasks will be added to your dashboard with automatic reminders.
                   </p>
                 </div>
               </div>
@@ -244,7 +328,7 @@ Ibuprofen 400mg - as needed for pain`}
                 <div className="text-sm text-gray-500 space-y-1">
                   <p>• Supports multiple formats</p>
                   <p>• Automatically detects frequency</p>
-                  <p>• Creates trackable tasks</p>
+                  <p>• Creates trackable tasks with reminders</p>
                 </div>
               </div>
             )}
@@ -252,5 +336,5 @@ Ibuprofen 400mg - as needed for pain`}
         </div>
       </div>
     </div>
-  )
+  );
 }

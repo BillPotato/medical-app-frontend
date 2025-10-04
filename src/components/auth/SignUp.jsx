@@ -1,3 +1,4 @@
+// components/auth/SignUp.jsx
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 
@@ -31,8 +32,8 @@ const SignUp = () => {
       }));
       localStorage.setItem('tasks', JSON.stringify([]));
       localStorage.setItem('surveys', JSON.stringify([]));
-      navigate('/dashboard');
-      setLoading(false);
+      // Use window.location to avoid React Router navigation issues
+      window.location.href = '/dashboard';
     }, 1000);
   };
 
@@ -118,7 +119,7 @@ const SignUp = () => {
         <div className="mt-8 text-center">
           <p className="text-gray-600">
             Already have an account?{' '}
-            <Link to="/signin" className="text-blue-600 hover:text-blue-700 font-semibold">
+            <Link to="/auth/signin" className="text-blue-600 hover:text-blue-700 font-semibold">
               Sign In
             </Link>
           </p>

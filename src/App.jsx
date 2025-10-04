@@ -27,7 +27,15 @@ function App() {
   useEffect(() => {
     try {
       const t = JSON.parse(localStorage.getItem('tasks') || '[]')
-      setTasks(t)
+      // Ensure all tasks have the required properties
+      const enhancedTasks = t.map(task => ({
+        ...task,
+        completed: task.completed || [],
+        isActive: task.isActive !== undefined ? task.isActive : true,
+        times: task.times || ['08:00'],
+        createdAt: task.createdAt || new Date().toISOString()
+      }))
+      setTasks(enhancedTasks)
     } catch (err) {
       console.error('Error loading tasks:', err)
     } finally {
@@ -36,9 +44,33 @@ function App() {
   }, [])
 
   function saveTasks(newTasks) {
-    const merged = [...newTasks, ...tasks]
+    // Add default properties to new tasks
+    const enhancedTasks = newTasks.map(task => ({
+      ...task,
+      completed: task.completed || [],
+      isActive: task.isActive !== undefined ? task.isActive : true,
+      times: task.times || ['08:00'],
+      createdAt: task.createdAt || new Date().toISOString()
+    }))
+
+    const merged = [...enhancedTasks, ...tasks]
     localStorage.setItem('tasks', JSON.stringify(merged))
     setTasks(merged)
+  }
+
+  // Add these functions for task management
+  function handleUpdateTask(updatedTask) {
+    const updatedTasks = tasks.map(task =>
+      task.id === updatedTask.id ? updatedTask : task
+    )
+    localStorage.setItem('tasks', JSON.stringify(updatedTasks))
+    setTasks(updatedTasks)
+  }
+
+  function handleDeleteTask(taskId) {
+    const updatedTasks = tasks.filter(task => task.id !== taskId)
+    localStorage.setItem('tasks', JSON.stringify(updatedTasks))
+    setTasks(updatedTasks)
   }
 
   function handleSurveySubmit(payload) {
@@ -61,7 +93,15 @@ function App() {
 
             <Route
               path="/dashboard"
-              element={isAuthenticated ? <DashboardPage tasks={tasks} /> : <Navigate to="/auth/signin" replace />}
+              element={isAuthenticated ? (
+                <DashboardPage
+                  tasks={tasks}
+                  onUpdateTask={handleUpdateTask}
+                  onDeleteTask={handleDeleteTask}
+                />
+              ) : (
+                <Navigate to="/auth/signin" replace />
+              )}
             />
 
             <Route
