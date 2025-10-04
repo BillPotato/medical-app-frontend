@@ -1,6 +1,7 @@
 // App.jsx
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { useEffect, useState, Suspense } from 'react'
+import { ThemeProvider } from './contexts/ThemeContext'
 
 // Import pages
 import AuthPage from './pages/AuthPage'
@@ -27,7 +28,6 @@ function App() {
   useEffect(() => {
     try {
       const t = JSON.parse(localStorage.getItem('tasks') || '[]')
-      // Ensure all tasks have the required properties
       const enhancedTasks = t.map(task => ({
         ...task,
         completed: task.completed || [],
@@ -44,7 +44,6 @@ function App() {
   }, [])
 
   function saveTasks(newTasks) {
-    // Add default properties to new tasks
     const enhancedTasks = newTasks.map(task => ({
       ...task,
       completed: task.completed || [],
@@ -58,7 +57,6 @@ function App() {
     setTasks(merged)
   }
 
-  // Add these functions for task management
   function handleUpdateTask(updatedTask) {
     const updatedTasks = tasks.map(task =>
       task.id === updatedTask.id ? updatedTask : task
@@ -82,57 +80,59 @@ function App() {
   }
 
   return (
-    <Router>
-      <div className="App">
-        <Suspense fallback={<LoadingSpinner />}>
-          <Routes>
-            <Route
-              path="/auth/*"
-              element={!isAuthenticated ? <AuthPage /> : <Navigate to="/dashboard" replace />}
-            />
+    <ThemeProvider>
+      <Router>
+        {/* Remove the fixed background classes here - let each page handle its own background */}
+        <div className="App min-h-screen theme-transition">
+          <Suspense fallback={<LoadingSpinner />}>
+            <Routes>
+              <Route
+                path="/auth/*"
+                element={!isAuthenticated ? <AuthPage /> : <Navigate to="/dashboard" replace />}
+              />
 
-            <Route
-              path="/dashboard"
-              element={isAuthenticated ? (
-                <DashboardPage
-                  tasks={tasks}
-                  onUpdateTask={handleUpdateTask}
-                  onDeleteTask={handleDeleteTask}
-                />
-              ) : (
-                <Navigate to="/auth/signin" replace />
-              )}
-            />
+              <Route
+                path="/dashboard"
+                element={isAuthenticated ? (
+                  <DashboardPage
+                    tasks={tasks}
+                    onUpdateTask={handleUpdateTask}
+                    onDeleteTask={handleDeleteTask}
+                  />
+                ) : (
+                  <Navigate to="/auth/signin" replace />
+                )}
+              />
 
-            <Route
-              path="/medication-parser"
-              element={isAuthenticated ? <MedicationParserPage onSave={saveTasks} /> : <Navigate to="/auth/signin" replace />}
-            />
+              <Route
+                path="/medication-parser"
+                element={isAuthenticated ? <MedicationParserPage onSave={saveTasks} /> : <Navigate to="/auth/signin" replace />}
+              />
 
-            <Route
-              path="/survey"
-              element={isAuthenticated ? <SurveyPage onSubmit={handleSurveySubmit} /> : <Navigate to="/auth/signin" replace />}
-            />
+              <Route
+                path="/survey"
+                element={isAuthenticated ? <SurveyPage onSubmit={handleSurveySubmit} /> : <Navigate to="/auth/signin" replace />}
+              />
 
-            <Route
-              path="/feeling-analyzer"
-              element={isAuthenticated ? <FeelingAnalyzerPage /> : <Navigate to="/auth/signin" replace />}
-            />
+              <Route
+                path="/feeling-analyzer"
+                element={isAuthenticated ? <FeelingAnalyzerPage /> : <Navigate to="/auth/signin" replace />}
+              />
 
-            <Route
-              path="/"
-              element={<Navigate to={isAuthenticated ? "/dashboard" : "/auth/signin"} replace />}
-            />
+              <Route
+                path="/"
+                element={<Navigate to={isAuthenticated ? "/dashboard" : "/auth/signin"} replace />}
+              />
 
-            {/* Catch all route */}
-            <Route
-              path="*"
-              element={<Navigate to={isAuthenticated ? "/dashboard" : "/auth/signin"} replace />}
-            />
-          </Routes>
-        </Suspense>
-      </div>
-    </Router>
+              <Route
+                path="*"
+                element={<Navigate to={isAuthenticated ? "/dashboard" : "/auth/signin"} replace />}
+              />
+            </Routes>
+          </Suspense>
+        </div>
+      </Router>
+    </ThemeProvider>
   )
 }
 

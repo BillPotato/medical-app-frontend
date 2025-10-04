@@ -1,6 +1,9 @@
+// components/Survey.jsx
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTheme } from '../contexts/ThemeContext'
 
+// Add this missing defaultQuestions array
 const defaultQuestions = [
   {
     id: 'mood',
@@ -46,6 +49,7 @@ export default function Survey({ onSubmit }) {
   })
   const [currentStep, setCurrentStep] = useState(0)
   const navigate = useNavigate()
+  const { isDark } = useTheme()
 
   const handleChange = (id, value) => {
     setAnswers((s) => ({ ...s, [id]: value }))
@@ -103,8 +107,8 @@ export default function Survey({ onSubmit }) {
                     type="button"
                     onClick={() => handleChange(question.id, value.toString())}
                     className={`group relative py-5 px-2 rounded-2xl font-medium transition-all duration-300 ${isSelected
-                        ? 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-200 scale-105'
-                        : 'bg-white border-2 border-gray-200 text-gray-700 hover:border-indigo-300 hover:shadow-md'
+                      ? 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-200 scale-105'
+                      : `bg-white dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-indigo-300 dark:hover:border-indigo-500 hover:shadow-md`
                       }`}
                   >
                     <span className="text-xl block">{value}</span>
@@ -120,7 +124,7 @@ export default function Survey({ onSubmit }) {
               })}
             </div>
             {question.labels && (
-              <div className="flex justify-between text-xs text-gray-500 px-2">
+              <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 px-2">
                 <span>{question.labels[0]}</span>
                 <span>{question.labels[question.labels.length - 1]}</span>
               </div>
@@ -137,7 +141,7 @@ export default function Survey({ onSubmit }) {
                 value={answers[question.id]}
                 onChange={(e) => handleChange(question.id, e.target.value)}
                 placeholder={question.placeholder}
-                className="w-full px-6 py-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-400 outline-none transition-all text-2xl text-center font-medium bg-white"
+                className="w-full px-6 py-4 border-2 border-gray-200 dark:border-gray-600 rounded-2xl focus:ring-4 focus:ring-indigo-100 dark:focus:ring-indigo-900 focus:border-indigo-400 dark:focus:border-indigo-500 outline-none transition-all text-2xl text-center font-medium bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
               {answers[question.id] && (
                 <div className="absolute right-4 top-1/2 -translate-y-1/2 text-green-500">
@@ -156,9 +160,9 @@ export default function Survey({ onSubmit }) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 py-8 px-4">
+    <div className={`min-h-screen py-8 px-4 ${isDark ? 'bg-slate-900' : 'bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50'}`}>
       <div className="max-w-3xl mx-auto">
-        <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl overflow-hidden border border-white/20">
+        <div className={`${isDark ? 'bg-gray-800/80 border-gray-700' : 'bg-white/80 backdrop-blur-sm'} rounded-3xl shadow-2xl overflow-hidden border ${isDark ? 'border-gray-700' : 'border-white/20'}`}>
           {/* Header */}
           <div className="relative bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 p-8 text-white overflow-hidden">
             <div className="absolute inset-0 opacity-10">
@@ -184,11 +188,11 @@ export default function Survey({ onSubmit }) {
 
           {/* Progress Bar */}
           <div className="px-8 pt-8 pb-4">
-            <div className="flex justify-between items-center text-sm text-gray-600 mb-3">
+            <div className="flex justify-between items-center text-sm text-gray-600 dark:text-gray-400 mb-3">
               <span className="font-medium">Step {currentStep + 1} of {defaultQuestions.length}</span>
-              <span className="text-indigo-600 font-semibold">{Math.round(progress)}% complete</span>
+              <span className="text-indigo-600 dark:text-indigo-400 font-semibold">{Math.round(progress)}% complete</span>
             </div>
-            <div className="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
+            <div className="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
               <div
                 className="bg-gradient-to-r from-indigo-500 to-purple-500 h-3 rounded-full transition-all duration-700 ease-out relative"
                 style={{ width: `${progress}%` }}
@@ -201,13 +205,13 @@ export default function Survey({ onSubmit }) {
           {/* Question */}
           <div className="p-8 pt-6">
             <div className="text-center mb-10 space-y-3">
-              <div className="inline-block px-4 py-1 bg-indigo-50 text-indigo-600 rounded-full text-sm font-medium mb-2">
+              <div className="inline-block px-4 py-1 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-full text-sm font-medium mb-2">
                 Question {currentStep + 1}
               </div>
-              <h2 className="text-3xl font-bold text-gray-800 leading-tight">
+              <h2 className="text-3xl font-bold text-gray-800 dark:text-white leading-tight">
                 {currentQuestion.text}
               </h2>
-              <p className="text-gray-500 text-lg">{currentQuestion.description}</p>
+              <p className="text-gray-500 dark:text-gray-400 text-lg">{currentQuestion.description}</p>
             </div>
 
             <div className="mb-10">
@@ -215,13 +219,13 @@ export default function Survey({ onSubmit }) {
             </div>
 
             {/* Navigation */}
-            <div className="flex justify-between items-center pt-8 border-t border-gray-100">
+            <div className="flex justify-between items-center pt-8 border-t border-gray-100 dark:border-gray-700">
               <button
                 onClick={prevStep}
                 disabled={currentStep === 0}
                 className={`flex items-center space-x-2 px-6 py-3 rounded-xl font-medium transition-all ${currentStep === 0
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-md'
+                  ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 cursor-not-allowed'
+                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 hover:shadow-md'
                   }`}
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -258,7 +262,7 @@ export default function Survey({ onSubmit }) {
         </div>
 
         {/* Helper text */}
-        <div className="text-center mt-6 text-gray-500 text-sm">
+        <div className="text-center mt-6 text-gray-500 dark:text-gray-400 text-sm">
           <p>Your responses are private and help us understand your health better</p>
         </div>
       </div>
