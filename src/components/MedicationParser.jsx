@@ -128,6 +128,31 @@ Multivitamin once daily`
     navigate('/dashboard');
   }
 
+  function addToGoogleCalendar() {
+    if (parsedTasks.length === 0) return;
+
+    // Create calendar events for each medication
+    const events = parsedTasks.map(task => {
+      const event = {
+        title: `Medication: ${task.title}`,
+        description: `Medication Reminder\n\nFrequency: ${task.frequency.replace(/-/g, ' ')}\nType: ${task.type}\nTimes: ${task.times.join(', ')}`,
+        location: 'Health Management',
+        startTime: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // Tomorrow
+        endTime: new Date(Date.now() + 25 * 60 * 60 * 1000).toISOString() // 1 hour later
+      };
+
+      // Create Google Calendar URL for this event
+      const startTime = new Date(event.startTime).toISOString().replace(/-|:|\.\d+/g, '');
+      const endTime = new Date(event.endTime).toISOString().replace(/-|:|\.\d+/g, '');
+
+      return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&details=${encodeURIComponent(event.description)}&location=${encodeURIComponent(event.location)}&dates=${startTime}/${endTime}`;
+    });
+
+    // Open the first event in Google Calendar
+    // Note: For multiple events, you might want to create them one by one or use batch creation
+    window.open(events[0], '_blank');
+  }
+
   function loadExample(exampleText) {
     setText(exampleText);
     setParsedTasks([]);
@@ -190,8 +215,8 @@ Multivitamin once daily`
                   onChange={(e) => setText(e.target.value)}
                   rows={10}
                   className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition resize-none font-mono text-sm ${isDark
-                      ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
-                      : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
+                    ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
+                    : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
                     }`}
                   placeholder={`Example:
 Lisinopril 10mg - once daily
@@ -238,8 +263,8 @@ Ibuprofen 400mg - as needed for pain`}
                     key={index}
                     onClick={() => loadExample(example)}
                     className={`w-full text-left p-4 rounded-lg transition-all border ${isDark
-                        ? 'bg-gray-700 hover:bg-blue-900/30 border-gray-600 hover:border-blue-500 text-gray-300'
-                        : 'bg-gray-50 hover:bg-blue-50 border-transparent hover:border-blue-200 text-gray-700'
+                      ? 'bg-gray-700 hover:bg-blue-900/30 border-gray-600 hover:border-blue-500 text-gray-300'
+                      : 'bg-gray-50 hover:bg-blue-50 border-transparent hover:border-blue-200 text-gray-700'
                       }`}
                   >
                     <div className="font-mono text-sm whitespace-pre-line">
@@ -262,16 +287,27 @@ Ibuprofen 400mg - as needed for pain`}
                     }`}>
                     Parsed Medications ({parsedTasks.length})
                   </h3>
-                  <span className="bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 text-sm px-3 py-1 rounded-full">
-                    Ready to save
-                  </span>
+                  <div className="flex items-center space-x-3">
+                    <span className="bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 text-sm px-3 py-1 rounded-full">
+                      Ready to save
+                    </span>
+                    <button
+                      onClick={addToGoogleCalendar}
+                      className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2 text-sm"
+                    >
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19a2 2 0 002 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z" />
+                      </svg>
+                      <span>Add to Calendar</span>
+                    </button>
+                  </div>
                 </div>
 
                 <div className="space-y-6">
                   {parsedTasks.map((task) => (
                     <div key={task.id} className={`p-4 rounded-lg border transition-colors ${isDark
-                        ? 'bg-gray-700 border-gray-600 hover:border-blue-500'
-                        : 'bg-gray-50 border-gray-200 hover:border-blue-300'
+                      ? 'bg-gray-700 border-gray-600 hover:border-blue-500'
+                      : 'bg-gray-50 border-gray-200 hover:border-blue-300'
                       }`}>
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center space-x-3">
@@ -305,8 +341,8 @@ Ibuprofen 400mg - as needed for pain`}
                                 value={time}
                                 onChange={(e) => handleTimeChange(task.id, timeIndex, e.target.value)}
                                 className={`px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition ${isDark
-                                    ? 'bg-gray-600 border-gray-500 text-white'
-                                    : 'bg-white border-gray-300 text-gray-900'
+                                  ? 'bg-gray-600 border-gray-500 text-white'
+                                  : 'bg-white border-gray-300 text-gray-900'
                                   }`}
                               />
                               {task.times.length > 1 && (
