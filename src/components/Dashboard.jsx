@@ -1,138 +1,328 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Bar } from 'react-chartjs-2'
+import { Bar, Line } from 'react-chartjs-2'
+import { useNavigate } from 'react-router-dom'
 import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
   BarElement,
+  LineElement,
+  PointElement,
   Title,
   Tooltip,
   Legend,
+  Filler,
 } from 'chart.js'
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  LineElement,
+  PointElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+)
 
 export default function Dashboard({ tasks = [] }) {
   const [surveys, setSurveys] = useState([])
+  const [activeTab, setActiveTab] = useState('overview')
+  const navigate = useNavigate()
 
   useEffect(() => {
     const s = JSON.parse(localStorage.getItem('surveys') || '[]')
     setSurveys(s)
   }, [])
 
-  const summary = useMemo(() => {
-    // simple: count surveys per day and average mood
-    if (!surveys.length) return { labels: [], moods: [] }
-    const labels = surveys.map((s) => new Date(s.date).toLocaleDateString())
-    const moods = surveys.map((s) => Number(s.answers.mood || 0))
-    return { labels, moods }
+  const stats = useMemo(() => {
+    const totalSurveys = surveys.length
+    const avgMood = surveys.length > 0
+      ? (surveys.reduce((sum, s) => sum + Number(s.answers.mood || 0), 0) / surveys.length).toFixed(1)
+      : 0
+    const avgPain = surveys.length > 0
+      ? (surveys.reduce((sum, s) => sum + Number(s.answers.pain || 0), 0) / surveys.length).toFixed(1)
+      : 0
+    const avgExercise = surveys.length > 0
+      ? (surveys.reduce((sum, s) => sum + Number(s.answers.exercise || 0), 0) / surveys.length).toFixed(0)
+      : 0
+
+    return { totalSurveys, avgMood, avgPain, avgExercise }
   }, [surveys])
 
-  function exportCalendar() {
-    // prepare event payloads for tasks
-    const events = tasks.map((t, i) => ({
-      summary: t.title,
-      description: `Frequency: ${t.frequency}`,
-      // naive timing
-      start: { dateTime: new Date(Date.now() + i * 3600 * 1000).toISOString() },
-      end: { dateTime: new Date(Date.now() + (i * 3600 + 30 * 60) * 1000).toISOString() },
-    }))
-    // In a real app this would call a backend that performs OAuth and then inserts events into Google Calendar
-    alert(`Prepared ${events.length} events for export. Implement server-side OAuth to send them.`)
-    console.log('calendar events', events)
+  const chartData = useMemo(() => {
+    if (!surveys.length) return { labels: [], moods: [], pains: [] }
+
+    const last7Surveys = surveys.slice(0, 7).reverse()
+    const labels = last7Surveys.map((s) =>
+      new Date(s.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    )
+    const moods = last7Surveys.map((s) => Number(s.answers.mood || 0))
+    const pains = last7Surveys.map((s) => Number(s.answers.pain || 0))
+
+    return { labels, moods, pains }
+  }, [surveys])
+
+  const handleLogout = () => {
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    navigate('/auth/signin')
   }
 
-  async function analyzeFeeling() {
-    if (!feelingText.trim()) return
-    setIsAnalyzing(true)
-    setAnalysis(null)
+  const user = JSON.parse(localStorage.getItem('user') || '{}')
 
-    try {
-      // Attempt server-side analysis first
-      const res = await fetch('/api/analyze-feeling', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: feelingText })
-      })
-
-      if (!res.ok) {
-        // Fallback to local analysis
-        setAnalysis(localAnalyze(feelingText))
-        return
-      }
-
-      const data = await res.json()
-      setAnalysis(data)
-    } catch (err) {
-      // Network error - use local fallback
-      setAnalysis(localAnalyze(feelingText))
-    } finally {
-      setIsAnalyzing(false)
-    }
-  }
-
-  function localAnalyze(text) {
-    // Simple keyword-based analysis for offline/demo mode
-    const t = text.toLowerCase()
-    const recs = []
-    let issue = 'Unclear from description'
-
-    if (/\b(pain|ache|hurt|sharp|stomach|headache)\b/.test(t)) {
-      issue = 'Possible physical pain/discomfort'
-      recs.push('Log pain levels and timing in daily survey')
-      recs.push('Consider over-the-counter pain relief if appropriate')
-      recs.push('Consult healthcare provider if severe or persistent')
-    }
-
-    if (/\b(tired|fatigue|sleep|insomnia)\b/.test(t)) {
-      issue = 'Possible sleep/energy issues'
-      recs.push('Maintain consistent sleep schedule')
-      recs.push('Track sleep patterns in daily survey')
-      recs.push('Review sleep hygiene practices')
-    }
-
-    if (/\b(anxious|worried|stress|depress|sad|mood)\b/.test(t)) {
-      issue = 'Possible mood/emotional concern'
-      recs.push('Continue tracking mood in daily survey')
-      recs.push('Consider speaking with mental health professional')
-      recs.push('Try relaxation or mindfulness exercises')
-    }
-
-    if (!recs.length) {
-      recs.push('Please provide more specific symptoms')
-      recs.push('Consider discussing with healthcare provider')
-    }
-
-    return {
-      issue,
-      recommendations: recs,
-      source: 'local-analysis',
-      timestamp: new Date().toISOString()
-    }
-  }
+  const StatCard = ({ title, value, subtitle, icon, color }) => (
+    <div className={`bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-200 ${color}`}>
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm font-medium text-gray-600">{title}</p>
+          <p className="text-2xl font-bold text-gray-900 mt-1">{value}</p>
+          {subtitle && <p className="text-xs text-gray-500 mt-1">{subtitle}</p>}
+        </div>
+        <div className="text-2xl">{icon}</div>
+      </div>
+    </div>
+  )
 
   return (
-    <div style={{padding:20}}>
-      <h2>Dashboard</h2>
-      <div style={{marginBottom:12}}>
-        <strong>Tasks ({tasks.length})</strong>
-        <ul>
-          {tasks.map((t) => (
-            <li key={t.id}>{t.title} — {t.frequency}</li>
-          ))}
-        </ul>
-        <button onClick={exportCalendar}>Export to Google Calendar (stub)</button>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50/30 p-4">
+      {/* Header */}
+      <div className="max-w-7xl mx-auto">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Welcome back, {user.name || 'User'}! 👋</h1>
+            <p className="text-gray-600 mt-2">Here's your health overview for today</p>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="mt-4 sm:mt-0 bg-white text-gray-700 hover:bg-gray-50 border border-gray-300 px-4 py-2 rounded-xl font-medium transition-colors duration-200 shadow-sm"
+          >
+            Logout
+          </button>
+        </div>
 
-      <div style={{maxWidth:600}}>
-        <h3>Weekly summary</h3>
-        {summary.labels.length ? (
-          <Bar
-            data={{ labels: summary.labels, datasets: [{ label: 'Mood', data: summary.moods, backgroundColor: 'rgba(75,192,192,0.6)' }] }}
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <StatCard
+            title="Total Surveys"
+            value={stats.totalSurveys}
+            subtitle="This month"
+            icon="📊"
+            color="hover:border-blue-200"
           />
-        ) : (
-          <p>No survey data yet — submit the daily survey to populate charts.</p>
-        )}
+          <StatCard
+            title="Average Mood"
+            value={stats.avgMood}
+            subtitle="Out of 5"
+            icon="😊"
+            color="hover:border-green-200"
+          />
+          <StatCard
+            title="Average Pain"
+            value={stats.avgPain}
+            subtitle="Out of 10"
+            icon="🎯"
+            color="hover:border-orange-200"
+          />
+          <StatCard
+            title="Avg Exercise"
+            value={`${stats.avgExercise}m`}
+            subtitle="Daily average"
+            icon="💪"
+            color="hover:border-purple-200"
+          />
+        </div>
+
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+          {/* Tasks Section */}
+          <div className="xl:col-span-2 space-y-6">
+            {/* Chart */}
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-semibold text-gray-900">Health Trends</h3>
+                <div className="flex space-x-2">
+                  {['overview', 'mood', 'pain'].map((tab) => (
+                    <button
+                      key={tab}
+                      onClick={() => setActiveTab(tab)}
+                      className={`px-3 py-1 rounded-lg text-sm font-medium capitalize transition-colors duration-200 ${activeTab === tab
+                          ? 'bg-blue-500 text-white'
+                          : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                        }`}
+                    >
+                      {tab}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {chartData.labels.length > 0 ? (
+                <div className="h-64">
+                  <Line
+                    data={{
+                      labels: chartData.labels,
+                      datasets: [
+                        {
+                          label: 'Mood',
+                          data: chartData.moods,
+                          borderColor: 'rgb(59, 130, 246)',
+                          backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                          tension: 0.4,
+                          fill: true,
+                        },
+                        {
+                          label: 'Pain',
+                          data: chartData.pains,
+                          borderColor: 'rgb(249, 115, 22)',
+                          backgroundColor: 'rgba(249, 115, 22, 0.1)',
+                          tension: 0.4,
+                          fill: true,
+                        }
+                      ]
+                    }}
+                    options={{
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      plugins: {
+                        legend: {
+                          position: 'top',
+                        },
+                      },
+                      scales: {
+                        y: {
+                          beginAtZero: true,
+                          max: 10,
+                        },
+                      },
+                    }}
+                  />
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <div className="text-4xl mb-4">📈</div>
+                  <p className="text-gray-500">No survey data yet</p>
+                  <button
+                    onClick={() => navigate('/survey')}
+                    className="mt-4 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors duration-200"
+                  >
+                    Take First Survey
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Tasks */}
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">Medication Tasks</h3>
+                <span className="bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded-full">
+                  {tasks.length} tasks
+                </span>
+              </div>
+
+              {tasks.length > 0 ? (
+                <div className="space-y-3">
+                  {tasks.slice(0, 5).map((task) => (
+                    <div key={task.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                        <span className="font-medium text-gray-800">{task.title}</span>
+                      </div>
+                      <span className={`px-2 py-1 text-xs rounded-full ${task.frequency === 'daily'
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-purple-100 text-purple-800'
+                        }`}>
+                        {task.frequency}
+                      </span>
+                    </div>
+                  ))}
+                  {tasks.length > 5 && (
+                    <p className="text-center text-gray-500 text-sm mt-4">
+                      +{tasks.length - 5} more tasks
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-6">
+                  <div className="text-3xl mb-3">💊</div>
+                  <p className="text-gray-500 mb-4">No medication tasks yet</p>
+                  <button
+                    onClick={() => navigate('/medication-parser')}
+                    className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors duration-200"
+                  >
+                    Add Medications
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Quick Actions Sidebar */}
+          <div className="space-y-6">
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+              <div className="space-y-3">
+                <button
+                  onClick={() => navigate('/survey')}
+                  className="w-full flex items-center space-x-3 p-4 bg-blue-50 hover:bg-blue-100 rounded-xl transition-colors duration-200 text-left"
+                >
+                  <div className="text-xl">📝</div>
+                  <div>
+                    <p className="font-medium text-gray-900">Daily Survey</p>
+                    <p className="text-sm text-gray-600">Complete your check-in</p>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => navigate('/feeling-analyzer')}
+                  className="w-full flex items-center space-x-3 p-4 bg-green-50 hover:bg-green-100 rounded-xl transition-colors duration-200 text-left"
+                >
+                  <div className="text-xl">😊</div>
+                  <div>
+                    <p className="font-medium text-gray-900">Feeling Analyzer</p>
+                    <p className="text-sm text-gray-600">Get insights</p>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => navigate('/medication-parser')}
+                  className="w-full flex items-center space-x-3 p-4 bg-purple-50 hover:bg-purple-100 rounded-xl transition-colors duration-200 text-left"
+                >
+                  <div className="text-xl">💊</div>
+                  <div>
+                    <p className="font-medium text-gray-900">Add Medications</p>
+                    <p className="text-sm text-gray-600">Manage your prescriptions</p>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            {/* Recent Surveys */}
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Surveys</h3>
+              {surveys.slice(0, 3).map((survey, index) => (
+                <div key={survey.id} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
+                  <div>
+                    <p className="font-medium text-gray-900">
+                      {new Date(survey.date).toLocaleDateString()}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      Mood: {survey.answers.mood}/5 • Pain: {survey.answers.pain}/10
+                    </p>
+                  </div>
+                  <div className="text-2xl">
+                    {Number(survey.answers.mood) >= 4 ? '😊' :
+                      Number(survey.answers.mood) >= 3 ? '😐' : '😔'}
+                  </div>
+                </div>
+              ))}
+              {surveys.length === 0 && (
+                <p className="text-gray-500 text-center py-4">No surveys completed yet</p>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )

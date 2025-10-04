@@ -1,12 +1,14 @@
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
-import MedicationParser from './components/MedicationParser'
-import Survey from './components/Survey'
-import Dashboard from './components/Dashboard'
-import FeelingAnalyzer from './components/FeelingAnalyzer'
+import AuthPage from './pages/AuthPage'
+import DashboardPage from './pages/DashboardPage'
+import FeelingAnalyzerPage from './pages/FeelingAnalyzerPage'
+import MedicationParserPage from './pages/MedicationParserPage'
+import SurveyPage from './pages/SurveyPage'
 
 function App() {
-  const [view, setView] = useState('dashboard')
   const [tasks, setTasks] = useState([])
+  const isAuthenticated = !!localStorage.getItem('token')
 
   useEffect(() => {
     const t = JSON.parse(localStorage.getItem('tasks') || '[]')
@@ -17,33 +19,60 @@ function App() {
     const merged = [...newTasks, ...tasks]
     localStorage.setItem('tasks', JSON.stringify(merged))
     setTasks(merged)
-    setView('dashboard')
   }
 
   function handleSurveySubmit(payload) {
-    // just switch to dashboard so user sees the summary
-    setView('dashboard')
+    console.log('Survey submitted:', payload)
+    // You can add additional logic here if needed
   }
 
   return (
-    <div style={{fontFamily:'system-ui, sans-serif', maxWidth:900, margin:'0 auto'}}>
-      <header style={{display:'flex', justifyContent:'space-between', alignItems:'center', padding:12}}>
-        <h1>Patient Helper (prototype)</h1>
-        <nav>
-          <button onClick={() => setView('dashboard')}>Dashboard</button>
-          <button onClick={() => setView('parser')}>Medication parser</button>
-          <button onClick={() => setView('survey')}>Daily survey</button>
-          <button onClick={() => setView('analyzer')}>Feeling Analyzer</button>
-        </nav>
-      </header>
+    <Router>
+      <div className="App">
+        <Routes>
+          {/* Auth routes - only accessible when NOT logged in */}
+          <Route
+            path="/auth/*"
+            element={!isAuthenticated ? <AuthPage /> : <Navigate to="/dashboard" replace />}
+          />
 
-      <main>
-        {view === 'dashboard' && <Dashboard tasks={tasks} />}
-        {view === 'parser' && <MedicationParser onSave={saveTasks} />}
-        {view === 'survey' && <Survey onSubmit={handleSurveySubmit} />}
-        {view === 'analyzer' && <FeelingAnalyzer />}
-      </main>
-    </div>
+          {/* Protected routes - only accessible when logged in */}
+          <Route
+            path="/dashboard"
+            element={
+              isAuthenticated ? <DashboardPage tasks={tasks} /> : <Navigate to="/auth/signin" replace />
+            }
+          />
+
+          <Route
+            path="/medication-parser"
+            element={
+              isAuthenticated ? <MedicationParserPage onSave={saveTasks} /> : <Navigate to="/auth/signin" replace />
+            }
+          />
+
+          <Route
+            path="/survey"
+            element={
+              isAuthenticated ? <SurveyPage onSubmit={handleSurveySubmit} /> : <Navigate to="/auth/signin" replace />
+            }
+          />
+
+          <Route
+            path="/feeling-analyzer"
+            element={
+              isAuthenticated ? <FeelingAnalyzerPage /> : <Navigate to="/auth/signin" replace />
+            }
+          />
+
+          {/* Default route */}
+          <Route
+            path="/"
+            element={<Navigate to={isAuthenticated ? "/dashboard" : "/auth/signin"} replace />}
+          />
+        </Routes>
+      </div>
+    </Router>
   )
 }
 
