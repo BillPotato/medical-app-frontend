@@ -14,7 +14,6 @@ import {
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 import MedicationTracker from './MedicationTracker';
-import ThemeToggle from './ThemeToggle';
 import { useTheme } from '../contexts/ThemeContext';
 import InteractiveStatBox from './InteractiveMoodbox';
 
@@ -36,7 +35,6 @@ export default function Dashboard({ tasks = [], onUpdateTask, onDeleteTask }) {
   const navigate = useNavigate();
   const { isDark } = useTheme();
 
-  // MOVE USER DEFINITION UP HERE
   const user = JSON.parse(localStorage.getItem('user') || '{}');
 
   useEffect(() => {
@@ -177,25 +175,6 @@ export default function Dashboard({ tasks = [], onUpdateTask, onDeleteTask }) {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    window.location.href = '/auth/signin';
-  };
-
-  const StatCard = ({ title, value, subtitle, icon, gradient }) => (
-    <div className={`bg-gradient-to-br ${gradient} rounded-2xl p-6 shadow-lg border border-white/20 backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:shadow-xl`}>
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-white/90">{title}</p>
-          <p className="text-3xl font-bold text-white mt-2">{value}</p>
-          {subtitle && <p className="text-xs text-white/70 mt-1">{subtitle}</p>}
-        </div>
-        <div className="text-3xl opacity-80">{icon}</div>
-      </div>
-    </div>
-  );
-
   const ChartTypeButton = ({ type, label, icon, isActive }) => (
     <button
       onClick={() => setChartType(type)}
@@ -229,24 +208,13 @@ export default function Dashboard({ tasks = [], onUpdateTask, onDeleteTask }) {
   );
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-        <div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            Welcome back, {user.name || 'Yui'}! 👋
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2 text-lg">Here's your health overview for today</p>
-        </div>
-        <div className="flex items-center space-x-4 mt-4 lg:mt-0">
-          <ThemeToggle />
-          <button
-            onClick={handleLogout}
-            className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-gray-700 dark:text-gray-200 hover:bg-white dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600 px-6 py-3 rounded-xl font-medium transition-all duration-300 hover:shadow-lg hover:scale-105"
-          >
-            Logout
-          </button>
-        </div>
+    <div className="space-y-8 pt-4">
+      {/* Welcome Section - Simplified without header elements */}
+      <div className="text-center">
+        <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          Welcome back, {user.name || 'there'}! 👋
+        </h1>
+        <p className="text-gray-600 dark:text-gray-400 mt-2 text-lg">Here's your health overview for today</p>
       </div>
 
       {/* Tab Navigation */}

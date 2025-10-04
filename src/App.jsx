@@ -3,6 +3,9 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { useEffect, useState, Suspense } from 'react'
 import { ThemeProvider } from './contexts/ThemeContext'
 
+// Import components
+import Header from './components/Header'
+
 // Import pages
 import AuthPage from './pages/AuthPage'
 import DashboardPage from './pages/DashboardPage'
@@ -82,8 +85,10 @@ function App() {
   return (
     <ThemeProvider>
       <Router>
-        {/* Remove the fixed background classes here - let each page handle its own background */}
         <div className="App min-h-screen theme-transition">
+          {/* Add Header component - it will automatically handle auth pages */}
+          <Header />
+
           <Suspense fallback={<LoadingSpinner />}>
             <Routes>
               <Route
