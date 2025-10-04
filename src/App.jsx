@@ -1,7 +1,8 @@
+// App.jsx
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { useEffect, useState, Suspense } from 'react'
 
-// Import all components directly
+// Import pages
 import AuthPage from './pages/AuthPage'
 import DashboardPage from './pages/DashboardPage'
 import SurveyPage from './pages/SurveyPage'
