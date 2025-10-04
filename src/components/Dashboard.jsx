@@ -180,7 +180,7 @@ export default function Dashboard({ tasks = [], onUpdateTask, onDeleteTask }) {
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    navigate('/auth/signin');
+    window.location.href = '/auth/signin';
   };
 
   const StatCard = ({ title, value, subtitle, icon, gradient }) => (
