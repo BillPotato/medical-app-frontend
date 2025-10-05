@@ -195,15 +195,15 @@ Multivitamin once daily`
     //     const event = 
     // }
     const events = parsedTasks.map(task => {
-        return {
-            title: task.title,
-            frequency: task.frequency,
-            times: task.times
-        }
+      return {
+        title: task.title,
+        frequency: task.frequency,
+        times: task.times
+      }
     })
 
     const eventsTextObj = {
-        content: JSON.stringify(events)
+      content: JSON.stringify(events)
     }
 
     try {
@@ -227,8 +227,8 @@ Multivitamin once daily`
           <button
             onClick={() => navigate('/dashboard')}
             className={`inline-flex items-center space-x-2 mb-6 transition-all duration-300 hover:scale-105 px-4 py-2 rounded-lg border ${isDark
-                ? 'text-gray-400 hover:text-white bg-gray-800/80 border-gray-700 hover:border-gray-500'
-                : 'text-gray-600 hover:text-gray-900 bg-white/80 border-gray-300 hover:border-gray-400'
+              ? 'text-gray-400 hover:text-white bg-gray-800/80 border-gray-700 hover:border-gray-500'
+              : 'text-gray-600 hover:text-gray-900 bg-white/80 border-gray-300 hover:border-gray-400'
               }`}
           >
             <span>←</span>
@@ -338,7 +338,7 @@ Ibuprofen 400mg - as needed for pain`}
                       Ready to save
                     </span>
                     <button
-                    //   onClick={addToGoogleCalendar}
+                      //   onClick={addToGoogleCalendar}
                       onClick={addToCalendar}
                       className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2 text-sm"
                     >
