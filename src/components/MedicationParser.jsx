@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
 import axios from "axios"
+import { toast } from 'react-toastify';
 
 export default function MedicationParser({ onSave }) {
   const [text, setText] = useState('');
@@ -82,6 +83,8 @@ Multivitamin once daily`
   function handleParse() {
     if (!text.trim()) return;
 
+    toast.info('Parsing tasks...');
+
     setIsParsing(true);
     setTimeout(() => {
       const tasks = parseToTasks(text);
@@ -127,6 +130,7 @@ Multivitamin once daily`
     setText('');
     setParsedTasks([]);
     navigate('/dashboard');
+    toast.success('Tasks saved successfully!');
   }
 
   function addToGoogleCalendar() {
@@ -202,9 +206,16 @@ Multivitamin once daily`
         content: JSON.stringify(events)
     }
 
-    const parsedEvents = await axios.post("http://localhost:3001/api/parser", eventsTextObj)
-    console.log(`parsedEvents: `, parsedEvents.data)
-    await axios.post("http://localhost:3001/api/create", { events: parsedEvents.data })
+    try {
+        const parsedEvents = await axios.post("http://localhost:3001/api/parser", eventsTextObj)
+        console.log(`parsedEvents: `, parsedEvents.data)
+        await axios.post("http://localhost:3001/api/create", { events: parsedEvents.data })
+        // Notify user of success
+        toast.success('Task added to Google Calendar successfully!');
+    } catch (error) {
+        // Notify user of error
+        toast.error('Failed to add task to Google Calendar.');
+    }
   }
 
   return (
