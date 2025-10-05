@@ -347,66 +347,65 @@ const IntroductionSection = () => {
             description="Access your health data anywhere, anytime with our responsive design"
           />
         </div>
-
-        {/* Testimonials */}
-        <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl p-12 mb-16">
-          <div className="text-center mb-12">
-            <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-              Loved by Users Worldwide
-            </h3>
-            <p className="text-gray-600 dark:text-gray-400 text-lg">
-              See what our community is saying about their experience
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <TestimonialCard
-              quote="Daily Dose completely transformed how I manage my health. The reminders are a lifesaver!"
-              author="Sarah Johnson"
-              role="Daily User"
-            />
-            <TestimonialCard
-              quote="As someone with multiple medications, this app keeps me organized and stress-free."
-              author="Michael Chen"
-              role="Health Enthusiast"
-            />
-            <TestimonialCard
-              quote="The mood tracking feature helped me understand patterns I never noticed before."
-              author="Emily Wilson"
-              role="Wellness Advocate"
-            />
-          </div>
-        </div>
-
-        {/* Stats */}
-        <div className="text-center mb-16">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            <StatCard number="50K+" label="Active Users" />
-            <StatCard number="99%" label="Satisfaction Rate" />
-            <StatCard number="24/7" label="Support" />
-            <StatCard number="1M+" label="Doses Tracked" />
-          </div>
-        </div>
-
-        {/* Final CTA */}
-        <div className="text-center">
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl p-12 text-white">
-            <h3 className="text-3xl font-bold mb-4">
-              Ready to Fuel Your Best Day?
-            </h3>
-            <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-              Join thousands of users and start your journey to better health management today
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a href="/auth/signup" className="bg-white text-blue-600 hover:bg-blue-50 px-8 py-4 rounded-xl font-bold text-lg transition-all duration-300 transform hover:scale-105">
-                Get Started Free
-              </a>
-              <a href="/auth/signin" className="border-2 border-white text-white hover:bg-white hover:text-blue-600 px-8 py-4 rounded-xl font-bold text-lg transition-all duration-300">
-                Sign In
-              </a>
-            </div>
-          </div>
-        </div>
+        {/* {/* Testimonials */}
+        {/* <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl p-12 mb-16"> */}
+        {/*   <div className="text-center mb-12"> */}
+        {/*     <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-4"> */}
+        {/*       Loved by Users Worldwide */}
+        {/*     </h3> */}
+        {/*     <p className="text-gray-600 dark:text-gray-400 text-lg"> */}
+        {/*       See what our community is saying about their experience */}
+        {/*     </p> */}
+        {/*   </div> */}
+        {/**/}
+        {/*   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"> */}
+        {/*     <TestimonialCard */}
+        {/*       quote="Daily Dose completely transformed how I manage my health. The reminders are a lifesaver!" */}
+        {/*       author="Sarah Johnson" */}
+        {/*       role="Daily User" */}
+        {/*     /> */}
+        {/*     <TestimonialCard */}
+        {/*       quote="As someone with multiple medications, this app keeps me organized and stress-free." */}
+        {/*       author="Michael Chen" */}
+        {/*       role="Health Enthusiast" */}
+        {/*     /> */}
+        {/*     <TestimonialCard */}
+        {/*       quote="The mood tracking feature helped me understand patterns I never noticed before." */}
+        {/*       author="Emily Wilson" */}
+        {/*       role="Wellness Advocate" */}
+        {/*     /> */}
+        {/*   </div> */}
+        {/* </div> */}
+        {/**/}
+        {/* {/* Stats */}
+        {/* <div className="text-center mb-16"> */}
+        {/*   <div className="grid grid-cols-2 md:grid-cols-4 gap-8"> */}
+        {/*     <StatCard number="50K+" label="Active Users" /> */}
+        {/*     <StatCard number="99%" label="Satisfaction Rate" /> */}
+        {/*     <StatCard number="24/7" label="Support" /> */}
+        {/*     <StatCard number="1M+" label="Doses Tracked" /> */}
+        {/*   </div> */}
+        {/* </div> */}
+        {/**/}
+        {/* {/* Final CTA */}
+        {/* <div className="text-center"> */}
+        {/*   <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl p-12 text-white"> */}
+        {/*     <h3 className="text-3xl font-bold mb-4"> */}
+        {/*       Ready to Fuel Your Best Day? */}
+        {/*     </h3> */}
+        {/*     <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto"> */}
+        {/*       Join thousands of users and start your journey to better health management today */}
+        {/*     </p> */}
+        {/*     <div className="flex flex-col sm:flex-row gap-4 justify-center"> */}
+        {/*       <a href="/auth/signup" className="bg-white text-blue-600 hover:bg-blue-50 px-8 py-4 rounded-xl font-bold text-lg transition-all duration-300 transform hover:scale-105"> */}
+        {/*         Get Started Free */}
+        {/*       </a> */}
+        {/*       <a href="/auth/signin" className="border-2 border-white text-white hover:bg-white hover:text-blue-600 px-8 py-4 rounded-xl font-bold text-lg transition-all duration-300"> */}
+        {/*         Sign In */}
+        {/*       </a> */}
+        {/*     </div> */}
+        {/*   </div> */}
+        {/* </div> */}
       </div>
     </div>
   )

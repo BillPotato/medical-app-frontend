@@ -191,15 +191,15 @@ Multivitamin once daily`
     //     const event = 
     // }
     const events = parsedTasks.map(task => {
-        return {
-            title: task.title,
-            frequency: task.frequency,
-            times: task.times
-        }
+      return {
+        title: task.title,
+        frequency: task.frequency,
+        times: task.times
+      }
     })
 
     const eventsTextObj = {
-        content: JSON.stringify(events)
+      content: JSON.stringify(events)
     }
 
     const parsedEvents = await axios.post("http://localhost:3001/api/parser", eventsTextObj)
@@ -211,21 +211,28 @@ Multivitamin once daily`
     <div className={`min-h-screen py-8 ${isDark ? 'bg-slate-900' : 'bg-gradient-to-br from-gray-50 to-blue-50/30'}`}>
       <div className="max-w-6xl mx-auto px-4">
         {/* Header */}
-        <div className="text-center mb-8">
+        <div className="mb-8">
+          {/* Back Button - Aligned to the left */}
           <button
             onClick={() => navigate('/dashboard')}
-            className={`inline-flex items-center space-x-2 mb-6 transition-colors ${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'
+            className={`inline-flex items-center space-x-2 mb-6 transition-all duration-300 hover:scale-105 px-4 py-2 rounded-lg border ${isDark
+              ? 'text-gray-400 hover:text-white bg-gray-800/80 border-gray-700 hover:border-gray-500'
+              : 'text-gray-600 hover:text-gray-900 bg-white/80 border-gray-300 hover:border-gray-400'
               }`}
           >
             <span>←</span>
             <span>Back to Dashboard</span>
           </button>
-          <h1 className={`text-3xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-            Medication Parser
-          </h1>
-          <p className={`text-xl max-w-2xl mx-auto ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-            Paste your medication list and we'll automatically create manageable tasks with reminders
-          </p>
+
+          {/* Title and Description - Still centered */}
+          <div className="text-center">
+            <h1 className={`text-3xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+              Medication Parser
+            </h1>
+            <p className={`text-xl max-w-2xl mx-auto ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+              Paste your medication list and we'll automatically create manageable tasks with reminders
+            </p>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -320,7 +327,7 @@ Ibuprofen 400mg - as needed for pain`}
                       Ready to save
                     </span>
                     <button
-                    //   onClick={addToGoogleCalendar}
+                      //   onClick={addToGoogleCalendar}
                       onClick={addToCalendar}
                       className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2 text-sm"
                     >
