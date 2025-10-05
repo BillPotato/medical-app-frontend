@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { feelingAnalyzerAPI } from '../services/api';
 import { useTheme } from '../contexts/ThemeContext';
 import axios from "axios"
+import { toast } from 'react-toastify';
 
 export default function FeelingAnalyzer({ onAnalysisComplete }) {
   const [feelingText, setFeelingText] = useState('');
@@ -25,6 +26,7 @@ export default function FeelingAnalyzer({ onAnalysisComplete }) {
     setIsAnalyzing(true);
     setError('');
     setAnalysis(null);
+    toast.info('Analyzing feeling...');
 
     try {
       const result = await feelingAnalyzerAPI.analyzeSymptoms(feelingText);
@@ -32,9 +34,11 @@ export default function FeelingAnalyzer({ onAnalysisComplete }) {
       if (onAnalysisComplete) {
         onAnalysisComplete(result);
       }
+      toast.success('Feeling analysis completed successfully!');
     } catch (err) {
       console.error('API Error:', err);
       setError('Failed to analyze symptoms. Please try again.');
+      toast.error('Error analyzing feeling. Please try again.');
       const localResult = localAnalyze(feelingText);
       setAnalysis(localResult);
     } finally {
@@ -110,8 +114,14 @@ export default function FeelingAnalyzer({ onAnalysisComplete }) {
     const eventsObj = {
         events
     }
-    const status = await axios.post("http://localhost:3001/api/create", eventsObj)
-    console.log(status.data)
+
+    try {
+        const status = await axios.post("http://localhost:3001/api/create", eventsObj)
+        toast.success("Routine added to Google Calendar")
+        console.log(status.data)
+    } catch {
+        toast.error("Request failed")
+    }
     
   }
 
