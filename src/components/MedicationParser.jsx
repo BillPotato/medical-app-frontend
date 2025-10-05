@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
+import axios from "axios"
 
 export default function MedicationParser({ onSave }) {
   const [text, setText] = useState('');
@@ -179,6 +180,33 @@ Multivitamin once daily`
     return icons[type] || '💊';
   };
 
+  const addToCalendar = async () => {
+    // for (let task of parsedTasks) {
+    //     const postObj = {
+    //         title: task.title,
+    //         frequency: task.frequency,
+    //         times: task.times
+    //     }
+
+    //     const event = 
+    // }
+    const events = parsedTasks.map(task => {
+        return {
+            title: task.title,
+            frequency: task.frequency,
+            times: task.times
+        }
+    })
+
+    const eventsTextObj = {
+        content: JSON.stringify(events)
+    }
+
+    const parsedEvents = await axios.post("http://localhost:3001/api/parser", eventsTextObj)
+    console.log(`parsedEvents: `, parsedEvents.data)
+    await axios.post("http://localhost:3001/api/create", { events: parsedEvents.data })
+  }
+
   return (
     <div className={`min-h-screen py-8 ${isDark ? 'bg-slate-900' : 'bg-gradient-to-br from-gray-50 to-blue-50/30'}`}>
       <div className="max-w-6xl mx-auto px-4">
@@ -299,7 +327,8 @@ Ibuprofen 400mg - as needed for pain`}
                       Ready to save
                     </span>
                     <button
-                      onClick={addToGoogleCalendar}
+                    //   onClick={addToGoogleCalendar}
+                      onClick={addToCalendar}
                       className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2 text-sm"
                     >
                       <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
