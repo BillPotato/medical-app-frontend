@@ -47,7 +47,6 @@ export default function FeelingAnalyzer({ onAnalysisComplete }) {
   };
 
   const localAnalyze = (text) => {
-    // ... (your existing local analysis logic)
     const t = text.toLowerCase();
     const recs = [];
     let issue = 'General wellness check';
@@ -95,38 +94,26 @@ export default function FeelingAnalyzer({ onAnalysisComplete }) {
   const addToCalendar = async (content) => {
     console.log(`Passed to server: ${content}`)
     const postObj = {
-        content
+      content
     }
-
-    // axios.post("http://localhost:3001/api/parser", postObj)
-    //     .then(res => {
-    //         const events = res.data
-    //         console.log(events)
-    //         axios.post("http://localhost:3001/api/create", events)
-    //             .then(res2 => {
-    //                 console.log(res2.data)
-    //             })
-    //     })
 
     const eventsText = await axios.post("http://localhost:3001/api/parser", postObj)
     const events = eventsText.data
     console.log(`EVENTS _____: ${events}`)
     const eventsObj = {
-        events
+      events
     }
 
     try {
-        const status = await axios.post("http://localhost:3001/api/create", eventsObj)
-        toast.success("Routine added to Google Calendar")
-        console.log(status.data)
+      const status = await axios.post("http://localhost:3001/api/create", eventsObj)
+      toast.success("Routine added to Google Calendar")
+      console.log(status.data)
     } catch {
-        toast.error("Request failed")
+      toast.error("Request failed")
     }
-    
   }
 
   const handleClick = async (content) => {
-    // await analyzeFeeling()
     await addToCalendar(content)
   }
 
@@ -166,7 +153,7 @@ export default function FeelingAnalyzer({ onAnalysisComplete }) {
 
         <div className="flex space-x-4">
           <button
-            onClick={(e)=>handleClick(feelingText)}
+            onClick={analyzeFeeling}
             disabled={isAnalyzing || !feelingText.trim()}
             className="flex-1 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:from-gray-300 disabled:to-gray-400 text-white font-semibold py-4 px-8 rounded-2xl transition-all duration-300 transform hover:scale-105 disabled:scale-100 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
           >
