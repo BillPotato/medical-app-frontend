@@ -212,7 +212,7 @@ export default function Dashboard({ tasks = [], onUpdateTask, onDeleteTask }) {
       {/* Welcome Section - Simplified without header elements */}
       <div className="text-center">
         <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-          Welcome back, {user.name || 'there'}! 👋
+          Welcome back, {user.name || 'there'}!
         </h1>
         <p className="text-gray-600 dark:text-gray-400 mt-2 text-lg">Here's your health overview for today</p>
       </div>
