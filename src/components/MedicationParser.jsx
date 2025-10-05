@@ -211,21 +211,28 @@ Multivitamin once daily`
     <div className={`min-h-screen py-8 ${isDark ? 'bg-slate-900' : 'bg-gradient-to-br from-gray-50 to-blue-50/30'}`}>
       <div className="max-w-6xl mx-auto px-4">
         {/* Header */}
-        <div className="text-center mb-8">
+        <div className="mb-8">
+          {/* Back Button - Aligned to the left */}
           <button
             onClick={() => navigate('/dashboard')}
-            className={`inline-flex items-center space-x-2 mb-6 transition-colors ${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'
+            className={`inline-flex items-center space-x-2 mb-6 transition-all duration-300 hover:scale-105 px-4 py-2 rounded-lg border ${isDark
+                ? 'text-gray-400 hover:text-white bg-gray-800/80 border-gray-700 hover:border-gray-500'
+                : 'text-gray-600 hover:text-gray-900 bg-white/80 border-gray-300 hover:border-gray-400'
               }`}
           >
             <span>←</span>
             <span>Back to Dashboard</span>
           </button>
-          <h1 className={`text-3xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-            Medication Parser
-          </h1>
-          <p className={`text-xl max-w-2xl mx-auto ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-            Paste your medication list and we'll automatically create manageable tasks with reminders
-          </p>
+
+          {/* Title and Description - Still centered */}
+          <div className="text-center">
+            <h1 className={`text-3xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+              Medication Parser
+            </h1>
+            <p className={`text-xl max-w-2xl mx-auto ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+              Paste your medication list and we'll automatically create manageable tasks with reminders
+            </p>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
